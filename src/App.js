@@ -33,17 +33,20 @@ class App extends React.Component {
     this.initRandom = this.initRandom.bind(this);
     this.checkStatus = this.checkStatus.bind(this);
     this.isInGrid = this.isInGrid.bind(this);
+    this.clearBoard = this.clearBoard.bind(this);
   }
 
   start() {
-    if (!this.state.start) {
+    if (this.state.start === false) {
       this.setState({
         game: this.initRandom(),
-        start: true
+        start: true,
+        stop: false,
+        clear: false
       });
     }
 
-    if (!this.state.stop) {
+    if (this.state.stop === false) {
       console.log(this.state.game);
       this.checkStatus();
       this.setState({
@@ -61,23 +64,21 @@ class App extends React.Component {
   clear() {
 
     this.setState({
-      game: clearBoard(),
+      game: this.clearBoard(),
+      clear: true,
       generation: 0,
-      start: false,
-      stop: false,
-      clear: true
     });
 
-    function clearBoard() {
-      var newCells = [...this.state.game];
+  }
+
+  clearBoard() {
+    var newCells = [...this.state.game];
       newCells.forEach(function(row) {
         row.forEach(function(cell) {
             cell.alive = false;
         });
       });
       return newCells;
-    }
-
   }
 
   stop() {
