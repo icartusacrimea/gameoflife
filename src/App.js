@@ -171,8 +171,6 @@ class App extends React.Component {
   }
 }
 
-//class checkContrast
-
 class GridControl extends React.Component {
   render() {
     if (this.props.rotate === true) {

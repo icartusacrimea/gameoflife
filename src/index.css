@@ -205,3 +205,38 @@ body {
     -webkit-transform: rotate(180deg) translateY(-90px); /* Safari */
     transform: rotate(180deg) translateY(-90px);
 }
+
+@media only screen and (max-width: 599px) {
+  .cell {
+    padding: 6.3px;
+    width: 1.6%;
+    height: 1.6%;
+    margin: 2px;
+  }
+  .grid {
+    transform: translateY(20px);
+  }
+  .rotate {
+    -ms-transform: rotate(180deg) translateY(-68px); /* IE 9 */
+    -webkit-transform: rotate(180deg) translateY(-68px); /* Safari */
+    transform: rotate(180deg) translateY(-68px);
+  }
+}
+
+@media only screen and (max-width: 499px) {
+  .cell {
+    padding: 6px;
+    width: 1.6%;
+    height: 1.6%;
+    margin: 1px;
+  }
+}
+
+@media only screen and (max-width: 399px) {
+  .cell {
+    padding: 5.3px;
+    width: 1.4%;
+    height: 1.4%;
+    margin: .8px;
+  }
+}
