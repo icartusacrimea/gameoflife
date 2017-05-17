@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-var stopcount = 0;
+var generator;
 
 var createCellBoard = function() {
   var rows = 25,
@@ -26,7 +26,8 @@ class App extends React.Component {
       generation: 0,
       start: false,
       stop: false,
-      clear: false
+      clear: false,
+      rotate: false
     };
 
     this.start = this.start.bind(this);
@@ -36,11 +37,11 @@ class App extends React.Component {
     this.checkStatus = this.checkStatus.bind(this);
     this.isInGrid = this.isInGrid.bind(this);
     this.clearBoard = this.clearBoard.bind(this);
-    this.startFromStop = this.startFromStop.bind(this);
+    this.rotate = this.rotate.bind(this);
   }
 
   start() {
-    //initial start
+    //initial start only
     if (this.state.start === false && this.state.stop === false) {
       this.setState({
         game: this.initRandom(),
@@ -49,26 +50,33 @@ class App extends React.Component {
         clear: false
       });
     }
-    if (this.state.stop === true && stopcount > 0) {
-      console.log("inside itttttt");
+    if (this.state.stop === true) {
+      //note to self: start was never set to false
+      this.setState({
+        stop: false,
+        game: this.checkStatus(),
+        generation: this.state.generation + 1
+      });
+      generator = setTimeout(this.start, 500);
     }
-
     if (this.state.stop === false) {
-      this.checkStatus();
       this.setState({
         game: this.checkStatus(),
         generation: this.state.generation + 1
       });
-
-      setTimeout(this.start, 500);
-    }
-    if (this.state.stop || this.state.clear) {
-      clearTimeout(this.start, 500);
+      generator = setTimeout(this.start, 500);
     }
   }
 
-  clear() {
+  stop() {
+    clearTimeout(generator);
+    this.setState({
+      stop: true
+    });
+  }
 
+  clear() {
+    clearTimeout(generator);
     this.setState({
       game: this.clearBoard(),
       clear: true,
@@ -76,24 +84,16 @@ class App extends React.Component {
       start: false,
       stop: false
     });
-
   }
 
   clearBoard() {
     var newCells = [...this.state.game];
-      newCells.forEach(function(row) {
-        row.forEach(function(cell) {
-            cell.alive = false;
-        });
+    newCells.forEach(function(row) {
+      row.forEach(function(cell) {
+          cell.alive = false;
       });
-      return newCells;
-  }
-
-  stop() {
-    stopcount++;
-    this.setState({
-      stop: true
     });
+    return newCells;
   }
 
   initRandom() {
@@ -147,17 +147,10 @@ class App extends React.Component {
     return (r >= 0 && r < 25) && (c >= 0 && c < 25);
   }
 
-  startFromStop() {
-   //this.checkStatus();
-   //if (this.state.start === true && this.state.stop === true) {
-    this.setState({
-        //stop: false,
-        game: this.checkStatus(),
-        generation: this.state.generation + 1
-      });
-
-      setTimeout(this.start, 500);
-   //}
+  rotate() {
+   this.setState({
+    rotate: !this.state.rotate
+   });
   }
 
   render() {
@@ -169,15 +162,36 @@ class App extends React.Component {
         <button className="start" onClick={this.start}>Start</button>
         <button className="stop" onClick={this.stop}>Stop</button>
         <button className="clear" onClick={this.clear}>Clear</button>
+        <button className="rotatebut" onClick={this.rotate}>Rotate</button>
         <p className="count">Generation: {this.state.generation}</p>
         </div>
-        <div className="grid">
-          <div className="flex-grid-row">
-            {this.state.game.map((row, i) => <CellRow key={i} index={i} gameRow={row} start={this.state.start} stop={this.state.stop} clear={this.state.clear} />)}
-          </div>
-        </div>
+        <GridControl game={this.state.game} start={this.state.start} stop={this.state.stop} clear={this.state.clear} rotate={this.state.rotate} />
       </div>
     );
+  }
+}
+
+//class checkContrast
+
+class GridControl extends React.Component {
+  render() {
+    if (this.props.rotate === true) {
+      return (
+      <div className="grid rotate">
+        <div className="flex-grid-row">
+          {this.props.game.map((row, i) => <CellRow key={i} index={i} gameRow={row} start={this.props.start} stop={this.props.stop} clear={this.props.clear} rotate={this.props.rotate} />)}
+        </div>
+      </div>
+      );
+    } else if (this.props.rotate === false) {
+      return (
+        <div className="grid">
+          <div className="flex-grid-row">
+            {this.props.game.map((row, i) => <CellRow key={i} index={i} gameRow={row} start={this.props.start} stop={this.props.stop} clear={this.props.clear} rotate={this.props.rotate} />)}
+          </div>
+        </div>
+      );
+    }
   }
 }
 
@@ -185,27 +199,25 @@ class CellRow extends React.Component {
   render() {
     return (
       <div className="fadeInEach">
-      {this.props.gameRow.map((cell, i) => <Cell key={i} cell={cell} start={this.props.start} stop={this.props.stop} clear={this.props.clear} />)}
+      {this.props.gameRow.map((cell, i) => <Cell key={i} cell={cell} start={this.props.start} stop={this.props.stop} clear={this.props.clear} rotate={this.props.rotate} />)}
       </div>
     );
   }
 }
 
 class Cell extends React.Component {
-
   render() {
     var thiscell = this.props.cell;
-    if (this.props.start === false || this.props.clear === true) {
+    if ((this.props.start === false && this.props.stop === false) || this.props.clear === true) {
       return ( <div className='cell'></div> );
-    } else if (this.props.start === true) {
+    } else if (this.props.start === true || (this.props.start === false && this.props.stop === true)) {
       if (thiscell.alive) {
-        return ( <div className='cell true'></div> );
+          return ( <div className='cell true'></div> );
       } else {
-        return ( <div className='cell false'></div> );
+          return ( <div className='cell false'></div> );
       }
     }
   }
-
 }
 
 export default App;
